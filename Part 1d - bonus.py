@@ -25,11 +25,13 @@ def validate_brupass_id(raw_id):
         print("BruPass ID must starts with 'BP'.")
         return False
 
+# Check whether the cleaned ID has exactly 15 characters 
     if len(cleaned_id) !=15:
         print("INVALID BruPass ID.")
         print("BruPass ID must be 15 characters long.")
         return False
-
+    
+# Check whether the category code is valid (CT, PR, WK, ST)
     category_code = cleaned_id[2:4]
 
     if category_code not in ["CT", "PR", "WK", "ST"]:
@@ -37,6 +39,7 @@ def validate_brupass_id(raw_id):
             print("BruPass ID must be either in CT, PR, WK or ST.")
             return False
 
+# Check whether the BruPass ID contains 4 characters for the year and whether they are digits
     year_text = cleaned_id[4:8]
 
     if not year_text.isdigit():
@@ -44,6 +47,7 @@ def validate_brupass_id(raw_id):
             print("BruPass ID must contain 4 characters")
             return False
 
+# Check whether the year is valid (between 2000 and 2026)
     year = int(year_text)
 
     if year < 2000 or year > 2026:
@@ -51,6 +55,7 @@ def validate_brupass_id(raw_id):
             print("BruPass ID year must be between 2000 and 2026 to be valid.")
             return False
     
+# Check whether the sequence number is valid (6 digits)
     sequence_numbers = cleaned_id[8:14]
 
     if not sequence_numbers.isdigit():
@@ -75,12 +80,17 @@ def validate_brupass_id(raw_id):
          if character.isdigit():
               digit_sum += int(character)
 
+# Make sure to calculate the check digit correctly by taking the remainder of the digit sum divided by 10
+
     calculated_check_digit = digit_sum % 10
+   
     if not check_digit.isdigit() or int(check_digit) != calculated_check_digit:
         print("INVALID BruPass ID.")
         print(f"Check digit invalid. Expected {calculated_check_digit}, got {check_digit}.")
         return False
+    
     actual_check_digit = int(check_digit)
+   
     if actual_check_digit != calculated_check_digit:
         print("INVALID BruPass ID.")
         print(f"Check digit invalid. Expected {calculated_check_digit}, got {actual_check_digit}.")
@@ -212,4 +222,3 @@ while True:
 
     else:
          print("Invalid Option. Please Enter 1, 2 or 3.")
-         
