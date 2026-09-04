@@ -1,102 +1,215 @@
-#1d
-#BP-CT2019-000142-7
+total_id_checked = 0
+valid_id_count = 0
+invalid_id_count = 0
+valid_ids = []
 
-BruPass = input("Enter BruPass ID: ")
-clean_id = BruPass.replace("-", "")
-cat_code = clean_id[2:4]      # Gets 'CT'
-year_str = clean_id[4:8]      # Gets '2019'
-seq_num = clean_id[8:14]      # Gets '000142'
+# MENU DISPLAY : DISPLAY THE MAIN MENU TO THE USER ( STAFF )
 
-if len(BruPass) == 12 and cat_code in ["CT", "PR", "WK", "ST"]: 
-    status = "result:valid"
-else: 
-    status = "result:invalid"
+def menu():
+    print("============================================")
+    print("   BruPass ID Validator - Staff terminal    ")
+    print("============================================")
+    print("[1] Validate a BruPass ID")
+    print("[2] View Session Summary")
+    print("[3] Exit")
+    print("--------------------------------------------")
 
-if status == "result:valid":
-    print("The ID is valid and active.")
+# VALIDATION OF BRUPASS ID ( CHECKS EVERY REQUIRED RULES IN THE CORRECT ORDER )
+
+def validate_brupass_id(raw_id):
+
+    cleaned_id = raw_id.replace("-","").upper()
+
+    if not cleaned_id.startswith("BP"):
+        print("INVALID BruPass ID.")
+        print("BruPass ID must starts with 'BP'.")
+        return False
+
+    if len(cleaned_id) !=15:
+        print("INVALID BruPass ID.")
+        print("BruPass ID must be 15 characters long.")
+        return False
+
+    category_code = cleaned_id[2:4]
+
+    if category_code not in ["CT", "PR", "WK", "ST"]:
+            print("INVALID BruPass ID.")
+            print("BruPass ID must be either in CT, PR, WK or ST.")
+            return False
+
+    year_text = cleaned_id[4:8]
+
+    if not year_text.isdigit():
+            print("INVALID BruPass ID.")
+            print("BruPass ID must contain 4 characters")
+            return False
+
+    year = int(year_text)
+
+    if year < 2000 or year > 2026:
+            print("INVALID BruPass ID.")
+            print("BruPass ID year must be between 2000 and 2026 to be valid.")
+            return False
     
-elif status == "result:invalid":
-    print("The ID is invalid or may require renewal.")
-    
+    sequence_numbers = cleaned_id[8:14]
 
-if cat_code == "CT":
-    category_name = "Citizen"
-elif cat_code == "PR":
-    category_name = "Permanent Resident"
-elif cat_code == "WK":
-    category_name = "Work Permit Holder"
-elif cat_code == "ST":
-    category_name = "Student Pass Holder"
-    
-current_year = 2026
-year_of_issue = int(year_str)
-years_elapsed = current_year - year_of_issue
+    if not sequence_numbers.isdigit():
+            print("INVALID BruPass ID.")
+            print("BruPass Sequence number must be exactly 6 digtis ")
+            return False
 
-if years_elapsed > 5:
-    status = "May require renewal (issued more than 5 years ago)"
-else:
-    status = "Active" 
+    check_digit = cleaned_id[14]
 
-print("\n--- Information Extraction ---")
-print(f"Result          : VALID")
-print(f"Category        : {category_name} ({cat_code})")
-print(f"Year of Issue   : {year_of_issue}")
-print(f"Sequence Number : {seq_num}")
-print(f"Status          : {status}\n")
+    if not check_digit.isdigit():
+            print("INVALID Check Digit.")
+            print("Check Digit must be a single digit")
+            return False
 
-#1e
+    # CALCULATING THE CHECK DATA:
 
-def display_session_summary(total_checked, valid_count, invalid_count, valid_ids_list):
-   
-    print("="*45)
-    print("             SESSION SUMMARY              ")
-    print("="*45)
-    
-    # Check if any IDs have been validated during the session
-    
-    if total_checked == 0:
-        print("No IDs have been checked yet in this session.")
-    else:
-        print(f"Total checked : {total_checked}")
-        print(f"Valid         : {valid_count}")
-        print(f"Invalid       : {invalid_count}")
-        print()
-        
-        # Display valid IDs if any exist
-        if valid_count > 0:
-            print("Valid BruPass IDs (raw user input):")
-            for index, raw_id in enumerate(valid_ids_list, start=1):
-                print(f"  {index}.  {raw_id}")
-        else:
-            print("No valid BruPass IDs were entered during this session.")
-            
-    print("==========================================")
+    digit_character = category_code + year_text + sequence_numbers
 
-# bonus
+    digit_sum = 0
 
-def validate_check_digit(clean_id):
-    """
-    Validates Rule 6: Check Digit (Z) for BruPass ID.
-    clean_id must be a hyphen-stripped string of 16 characters.
-    """
-    # 1. Extract the check digit Z (16th character, index 15)
-    provided_check_digit = clean_id[15]
-    
-    # Ensure provided check digit is numeric
-    if not provided_check_digit.isdigit():
-        return False, "Rule #6 Failed: Check digit must be a single numeric digit."
+    for character in digit_character:
+         if character.isdigit():
+              digit_sum += int(character)
 
-    # 2. Extract the CC + YYYY + NNNNNN (indices 2 through 13)
-    middle_section = clean_id[2:14]
-    
-    # 3. Sum only digit characters from middle_section
-    digit_sum = sum(int(char) for char in middle_section if char.isdigit())
-            
-    # 4. Calculate Z = mod 10
     calculated_check_digit = digit_sum % 10
-    
-    # 5. Verify match
-    if calculated_check_digit == int(provided_check_digit):
-        return True, "Check digit is valid."
+    if not check_digit.isdigit() or int(check_digit) != calculated_check_digit:
+        print("INVALID BruPass ID.")
+        print(f"Check digit invalid. Expected {calculated_check_digit}, got {check_digit}.")
+        return False
+    actual_check_digit = int(check_digit)
+    if actual_check_digit != calculated_check_digit:
+        print("INVALID BruPass ID.")
+        print(f"Check digit invalid. Expected {calculated_check_digit}, got {actual_check_digit}.")
+        return False
+
+    print("VALID BruPass ID.")
+    return True
+
+# INFORMATION EXTRACTION : THIS IS WHERE THE EXTRACTS AND INFORMATION ARE BEING DISPLAYED ( FOR VALID BRUPASS ID ).
+
+def information_extracted(raw_id):
+
+    cleaned_id = raw_id.replace("-","").upper()
+    category_code = cleaned_id[2:4]
+    year = int(cleaned_id[4:8])
+    sequence_number = cleaned_id[8:14]
+
+# DETERMINING CATEGORY CODE
+
+    if category_code == 'CT':
+         category_code = ("Citizen (CT)")
+        
+    elif category_code == 'PR':
+         category_code = ("Permanent Citizen")
+        
+    elif category_code == 'WK':
+         category_code = ("Work Permit Holder (WK)")
+        
+    elif category_code == 'ST':
+         category_code = ("Student Pass Holder (ST)")
+        
     else:
-        return False, f"Rule #6 Failed: Check digit mismatch (Expected {calculated_check_digit}, got {provided_check_digit})."
+        print("No Validated BruPass.")
+
+# DETERMINING ID STATUS
+
+    current_year = 2026
+
+    if current_year - year > 5:
+        status = "May require renewal (issued more than 5 years ago)"
+    else:
+        status = "Active"
+
+    print("----------------------------------------------")
+    print("BruPass Status: Valid")
+    print("----------------------------------------------")
+    print("========== BruPass Session Summary ===========")
+    print("  Registration category  : ", category_code)
+    print("  Year of issued         : ", year)
+    print("  Sequence number        : ", sequence_number)
+    print("  Status                 : ", status)
+    print("==============================================")
+
+# SESSION SUMMARY SECTION : DISPLAY EVERYTHING CHECKED DURING THE SESSION.
+
+def summary_session():
+
+    print("==============================================")
+    print("               SESSION SUMMARY                ")
+    print("==============================================")
+
+    if total_id_checked == 0:
+         print("Session is empty. No ID has been checked yet.")
+         print("==============================================")
+         return
+    
+    print(f"Total checked  :{total_id_checked}")
+    print(f"Valid ID       :{valid_id_count}")
+    print(f"Invalid        :{invalid_id_count}")
+    print("")
+    print("Valid BruPass IDs this session:")
+
+    if len(valid_ids) == 0:
+        print("No valid IDs were entered.")
+    else:
+        number = 1
+
+        for id in valid_ids:
+             print(str(number) + ". " + id.upper())
+             number = number + 1
+    print("==============================================")
+
+# MAIN MENU LOOP : THIS IS TO KEEP THE PROGRAM TO CONTINUE RUNNING UNTIL THE USER SELECTS TO EXIT.
+
+while True:
+
+    menu()
+
+    choice = input("Enter your option (1-3): ")
+
+    if choice == "1":
+
+         raw_id = input("Enter BruPass ID ( or press enter to cancel): ")
+
+         print(f">> Checking : {raw_id}...")
+
+         if raw_id == "":
+              print("INVALID INPUT. Please enter a BruPass ID.")
+              continue
+
+         total_id_checked = total_id_checked + 1
+
+         is_valid = validate_brupass_id(raw_id)
+
+         if is_valid:
+              valid_id_count = valid_id_count + 1
+
+              valid_ids.append(raw_id)
+
+              information_extracted(raw_id)
+
+         else:
+              invalid_id_count = invalid_id_count + 1
+
+         input("Press Enter to return to the main menu.")
+
+    elif choice == "2":
+
+         summary_session()
+
+         input("Press Enter to return to the main menu.")
+
+    elif choice == "3":
+
+         print("==============================================")
+         print("                 Thank you!                   ")
+         print("==============================================")
+         break
+
+    else:
+         print("Invalid Option. Please Enter 1, 2 or 3.")
+         
