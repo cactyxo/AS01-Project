@@ -1,0 +1,93 @@
+# AS02: KEDAI RUNCIT SALES TRACKER
+
+FILENAME = "kedai_runcit_sales.csv"
+
+
+# CHECK ONE ROW: returns the clean data and the reasons (or "")
+def validate_row(fields):
+
+    # Check whether the row has 4 fields
+    if len(fields) < 4:
+        return None, f"Missing field ({len(fields)} columns found)"
+
+    name = fields[0].strip()
+    category = fields[1].strip()
+    quantity_text = fields[2].strip()
+    price_text = fields[3].strip()
+
+    # Check whether the quantity is a whole number
+    if not quantity_text.isdigit(): #Checks if it is a digit from 0 to 9 
+        if quantity_text.startswith("-") and quantity_text[1:].isdigit(): #Checks if Negative & Checks if the rest of the string is a digit
+            return None, f"Negative quantity ({quantity_text})"
+        return None, f"Non-numeric quantity ({quantity_text})" 
+
+    # Check whether the price is a valid number 
+    if not price_text.replace(".", "", 1).isdigit(): #Checks if price is a number (even if it has a decimal point)
+        return None, f"Non-numeric price ({price_text})"
+
+    # Dictionary for the clean row data (Latest Learnt Topic)
+    clean_row = {
+        "name": name,
+        "category": category,
+        "quantity": int(quantity_text),
+        "price": float(price_text)
+    }
+    return clean_row, ""
+
+
+# Reads the file which returns a list of clean rows and a list of dirty rows (Summarises the data)
+def load_file(filename): 
+    clean_rows = []
+    dirty_rows = []
+    row_number = 0
+
+    try:
+        file = open(filename, "r") #To check the file which is the kedai_runcit_sales.csv file
+    except FileNotFoundError:
+        print(f"Error: cannot find {filename}")
+        return clean_rows, dirty_rows
+
+    lines = file.readlines()
+    file.close()
+
+    # Start from line 1 to skip the header line
+    for i in range(1, len(lines)):
+        row_number += 1
+        fields = lines[i].strip().split(",")
+
+        clean_row, reason = validate_row(fields)
+
+        if clean_row is not None:
+            clean_rows.append(clean_row)
+        else:
+            dirty_row = {"row": row_number, "product": fields[0].strip(), "reason": reason}
+            dirty_rows.append(dirty_row)
+
+    return clean_rows, dirty_rows
+
+
+
+# PRINT THE LOADING SUMMARY
+def show_loading_summary(filename, clean_rows, dirty_rows):
+    total_rows = len(clean_rows) + len(dirty_rows)
+    print(f"=== Loading {filename} ===")
+    print(f"Total rows read : {total_rows}")
+    print(f"Clean rows      : {len(clean_rows)}")
+    print(f"Dirty rows      : {len(dirty_rows)}")
+    print()
+    print("--- Skipped Rows ---")
+    for dirty in dirty_rows:
+        print(f"Row {dirty['row']:>2} : {dirty['reason']:<32} - {dirty['product']}")
+    print("-" * 60)
+    print(f"{len(clean_rows)} rows ready for analysis.")
+
+
+
+# MAIN PROGRAM
+def main():
+    clean_rows, dirty_rows = load_file(FILENAME)
+    if len(clean_rows) + len(dirty_rows) == 0:
+        return
+    show_loading_summary(FILENAME, clean_rows, dirty_rows)
+
+main()
