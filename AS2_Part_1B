@@ -1,0 +1,84 @@
+#Task 1B
+
+def calculate_revenue_by_category(clean_rows):
+   
+    revenue_dict = {}
+    for row in clean_rows:
+        category = row[1]
+        quantity = int(row[2])
+        unit_price = float(row[3])
+        item_revenue = quantity * unit_price
+        
+        if category in revenue_dict:
+            revenue_dict[category] += item_revenue
+        else:
+            revenue_dict[category] = item_revenue
+            
+    return revenue_dict
+
+
+def calculate_quantity_by_category(clean_rows):
+    
+    quantity_dict = {}
+    for row in clean_rows:
+        category = row[1]
+        quantity = int(row[2])
+        
+        if category in quantity_dict:
+            quantity_dict[category] += quantity
+        else:
+            quantity_dict[category] = quantity
+            
+    return quantity_dict
+
+
+def get_best_selling_product(clean_rows):
+
+    #First, aggregate the revenue by product
+    product_revenue = {}
+    for row in clean_rows:
+        product_name = row[0]
+        quantity = int(row[2])
+        unit_price = float(row[3])
+        item_revenue = quantity * unit_price
+        
+        if product_name in product_revenue:
+            product_revenue[product_name] += item_revenue
+        else:
+            product_revenue[product_name] = item_revenue
+
+    #Find product with maximum revenue
+    best_product = None
+    max_revenue = -1.0
+    for product_name, revenue in product_revenue.items():
+        if revenue > max_revenue:
+            max_revenue = revenue
+            best_product = product_name
+
+    return best_product, max_revenue
+
+
+def get_worst_selling_product(clean_rows):
+  
+    #Aggregate revenue by product
+    product_revenue = {}
+    for row in clean_rows:
+        product_name = row[0]
+        quantity = int(row[2])
+        unit_price = float(row[3])
+        item_revenue = quantity * unit_price
+        
+        if product_name in product_revenue:
+            product_revenue[product_name] += item_revenue
+        else:
+            product_revenue[product_name] = item_revenue
+
+    #Find product with minimum revenue
+    worst_product = None
+    min_revenue = float('inf')
+    for product_name, revenue in product_revenue.items():
+        if revenue < min_revenue:
+            min_revenue = revenue
+            worst_product = product_name
+
+    return worst_product, min_revenue
