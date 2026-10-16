@@ -129,6 +129,8 @@ def show_loading_summary(filename, clean_rows, dirty_rows):
 
 # >>> TASK 1B Sales Analysis Functions <<<<
 
+#Calculates total revenue by category
+
 def calculate_revenue_by_category(clean_rows):
 
     revenue_dictionary = {}
@@ -149,6 +151,8 @@ def calculate_revenue_by_category(clean_rows):
 
     return revenue_dictionary
 
+#Calculates total quantity sold by category
+
 def calculate_quantity_by_category(clean_rows):
 
     quantity_dictionary = {}
@@ -165,6 +169,8 @@ def calculate_quantity_by_category(clean_rows):
             quantity_dictionary[category] = quantity
 
     return quantity_dictionary
+
+#Finds the product with the highest revenue
 
 def get_best_selling_product(clean_rows):
 
@@ -194,6 +200,8 @@ def get_best_selling_product(clean_rows):
                 best_product = product_name
 
         return best_product, max_revenue
+
+#Finds the product with the lowest revenue
 
 def get_worst_selling_product(clean_rows):
     product_revenue = {}
