@@ -7,7 +7,7 @@
 
 import numpy as np
 
-# >>> TASK 1A File Reading and Error Handling <<<<
+#TASK 1A File Reading and Error Handling 
 
 FILE = "kedai_runcit_sales.csv"
 
@@ -267,6 +267,7 @@ def sales_report(clean_rows):
     print("=============================================")
 
 # Bonus Task: Export Report to File.
+# Builds the sales report in the same format as the on-screen report. It stores each line in a list, writes the lines into a text file, then prints a confirmation message.
 
 def export_report(filename, clean_rows):
     revenue_data = calculate_revenue_by_category(clean_rows)
